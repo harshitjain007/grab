@@ -15,7 +15,9 @@ logger.setLevel(logging.INFO)
 
 def writeToQueue(queue_name,records):
     resp = kinesis_client.put_records(Records=records,StreamName=queue_name)
-    logger.info('FailedRecordCount is {}'.format(resp['FailedRecordCount']))
+    fail_cnt = resp['FailedRecordCount']
+    success_cnt = len(records) - fail_cnt
+    logger.info('SucessfulRecordCount:{} & FailedRecordCount:{}'.format(success_cnt,fail_cnt))
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:

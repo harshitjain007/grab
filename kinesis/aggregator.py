@@ -4,15 +4,17 @@ import json
 import boto3
 import copy
 import math
+import logging
 import psycopg2
 from decimal import *
 from datetime import datetime, timedelta
 
 kinesis_client = boto3.client("kinesis")
-conf = json.loads()
+conf_file = open("/home/ec2-user/conf.json","r")
+conf = json.loads(conf_file.read())
+conf_file.close()
 rds_client = psycopg2.connect(database=conf["db"], user = conf["user"],\
             password = conf["password"], host = conf["host"], port = conf["port"])
-
 #logging
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -37,42 +39,50 @@ def fetchRecords(queue_name,timestamp,agg_interval):
     resp = kinesis_client.get_records(ShardIterator=shard_itr_cd, Limit=100)
 
     geo_dict = {}
-    if len(resp["Records"])>0:
-        if not populate_count(geo_dict,res["Records"],timestamp):
-            return geo_dict
+    if not populate_count(geo_dict,resp["Records"],timestamp):return geo_dict
 
+    total_rec_cnt = len(resp["Records"])
     while resp["NextShardIterator"] is not None:
         shard_itr_cd = resp["NextShardIterator"]
+        time.sleep(0.5)
         resp = kinesis_client.get_records(ShardIterator=shard_itr_cd,Limit=100)
-        if len(resp["Records"])>0:
-            if not populate_count(geo_dict,res["Records"],timestamp):
-                return geo_dict
+
+        rec_cnt = len(resp["Records"])
+        if rec_cnt==0:return geo_dict
+        else: total_rec_cnt+=rec_cnt
+        logger.info("Total records fetched:{}".format(total_rec_cnt))
+
+        if not populate_count(geo_dict,resp["Records"],timestamp):return geo_dict
 
     return geo_dict
 
 def compute_surge(geo_demand,geo_supply,max_surge):
-    surge_dict = copy.deepcopy(geo_demand)
+    surge_dict = {}
     coeff = max_surge-1
-    for area_hash in surge_dict:
+    for area_hash in geo_demand:
         if area_hash not in geo_supply:
             surge_dict[area_hash] = max_surge
-        elif geo_supply[area_hash]<surge_dict[area_hash]:
-            surge_dict[area_hash] = 1 + coeff*math.atan(surge_dict[area_hash]/geo_supply[area_hash])
-        else:
-            surge_dict.remove(area_hash)
+        elif geo_supply[area_hash]<geo_demand[area_hash]:
+            surge_dict[area_hash] = 1 + coeff*math.atan(geo_demand[area_hash]/geo_supply[area_hash])
     return surge_dict
 
-def update_surge_table(geo_surge):
+def update_surge_table(geo_surge,geo_demand,geo_supply):
+    logger.info("Truncating the table...")
     cur = rds_client.cursor()
     cur.execute("TRUNCATE v1.geo_area_surge;")
     rds_client.commit()
+    logger.info("Table truncated successfully.")
 
+    logger.info("Inserting the records into the table...")
     ctr = 0
     for area_hash in geo_surge:
-        cur.execute("INSERT INTO v1.geo_area_surge (geo_hash, surge) VALUES ({},{})".format(area_hash, geo_surge[area_hash]))
-        ctr = ctr + 1
-        if ctr%10==0:
-             rds_client.commit()
+        supply = geo_supply[area_hash] if area_hash in geo_supply else 0
+        cur.execute("INSERT INTO v1.geo_area_surge (geo_hash,demand,supply,surge) \
+        VALUES ('{}',{},{},{})".format(area_hash, geo_demand[area_hash], supply, geo_surge[area_hash]))
+        ctr += 1
+        if ctr%50==0:
+            rds_client.commit()
+            logger.info("Total records inserted:{}".format(ctr))
     rds_client.commit()
 
 if __name__ == "__main__":
@@ -98,6 +108,11 @@ if __name__ == "__main__":
 
         logger.info("Calculating surge for the areas...")
         geo_surge = compute_surge(geo_demand,geo_supply,max_surge)
+        logger.info("Surge calculation complete.")
 
-        update_surge_table(geo_surge)
-        time.sleep(60)
+        logger.info("Updating the surge table with {} records...".format(len(geo_surge)))
+        update_surge_table(geo_surge,geo_demand,geo_supply)
+        logger.info("Surge table updated successfully.")
+
+        logger.info("Sleeping for {} seconds...".format(run_freq))
+        time.sleep(run_freq)
