@@ -1,4 +1,4 @@
-webserver/grab/grab/settings.py
+webserver/django/grab/settings.py
 accessKeys.csv
 data/*
 conf.json
