@@ -1,0 +1,2 @@
+#producer
+nohup python ./producer.py /home/ec2-user/tmp.csv 10 user-reqeust
