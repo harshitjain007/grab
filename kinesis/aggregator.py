@@ -56,14 +56,18 @@ def fetchRecords(queue_name,timestamp,agg_interval):
 
     return geo_dict
 
-def compute_surge(geo_demand,geo_supply,max_surge):
+def surge(deman,supply,max_surge):
+    coeff = 1-max_surge
+    x = float(geo_demand[area_hash])/float(geo_supply[area_hash])
+    return max_surge + coeff * math.exp((1-x)/2)
+
+def compute_areawise_surge(geo_demand,geo_supply,max_surge):
     surge_dict = {}
-    coeff = max_surge-1
     for area_hash in geo_demand:
         if area_hash not in geo_supply:
             surge_dict[area_hash] = max_surge
         elif geo_supply[area_hash]<geo_demand[area_hash]:
-            surge_dict[area_hash] = 1 + coeff*math.atan(geo_demand[area_hash]/geo_supply[area_hash])
+            surge_dict[area_hash] = surge(geo_demand[area_hash],geo_supply[area_hash],max_surge)
     return surge_dict
 
 def update_surge_table(geo_surge,geo_demand,geo_supply):
@@ -107,7 +111,7 @@ if __name__ == "__main__":
         logger.info("Total {} supply records fetched for {} geo_areas".format(sum(geo_supply.values()),len(geo_supply)))
 
         logger.info("Calculating surge for the areas...")
-        geo_surge = compute_surge(geo_demand,geo_supply,max_surge)
+        geo_surge = compute_areawise_surge(geo_demand,geo_supply,max_surge)
         logger.info("Surge calculation complete.")
 
         logger.info("Updating the surge table with {} records...".format(len(geo_surge)))
