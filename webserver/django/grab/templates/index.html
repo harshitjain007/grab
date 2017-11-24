@@ -103,6 +103,14 @@
         heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
       }
 
+      function fetchPoins(){
+        $.ajax({
+          url: "/data/surge/real_time",
+          success: function(result){
+                console.log(result);
+            }
+          });
+      }
       // Heatmap data: 500 Points
       function getPoints() {
         return [
