@@ -5,5 +5,4 @@ from django.http import HttpResponse,JsonResponse
 
 
 def index(request):
-    return render(request, 'grab/index.html')
-   
+    return render(request, 'index.html')
