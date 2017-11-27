@@ -12,8 +12,8 @@ def get_real_time_surge(request):
     objects = RegionSurge.objects.all()
     ret = []
     for obj in objects:
-        ret_dict = {}
-        ret_dict["geo_hash"]
+        ret.add(str(obj))
+    return JsonResponse(ret)
 
 def get_historical_surge(request):
     return JsonResponse()
