@@ -5,6 +5,7 @@ import boto3
 import logging
 from decimal import *
 from datetime import datetime
+from sets import Set
 
 kinesis_client = boto3.client("kinesis")
 
@@ -15,9 +16,13 @@ logger.setLevel(logging.INFO)
 
 def writeToQueue(queue_name,records):
     resp = kinesis_client.put_records(Records=records,StreamName=queue_name)
+    shards = Set([])
+    for rec in resp["Records"]: shards.add(rec["ShardId"])
+
     fail_cnt = resp['FailedRecordCount']
     success_cnt = len(records) - fail_cnt
-    logger.info('SucessfulRecordCount:{} & FailedRecordCount:{}'.format(success_cnt,fail_cnt))
+
+    logger.info('SucessWrites:{}  FailedWrites:{} Shards:{}'.format(success_cnt,fail_cnt,str(list(shards))))
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
@@ -48,3 +53,4 @@ if __name__ == "__main__":
                 writeToQueue(queue_name,rec_list)
                 rec_list = []
                 time.sleep(write_freq)
+

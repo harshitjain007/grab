@@ -29,9 +29,12 @@ def populate_count(geo_dict,rec_list,timestamp):
     return True
 
 def fetchRecords(queue_name,timestamp,agg_interval):
+    stream_info = kinesis_client.describe_stream(StreamName=queue_name)
+    shard_id = stream_info["StreamDescription"]["Shards"][0]["ShardId"]
+
     shard_itr = kinesis_client.get_shard_iterator(
         StreamName=queue_name,
-        ShardId="shardId-000000000000",
+        ShardId=shard_id,
         ShardIteratorType="AT_TIMESTAMP",
         Timestamp=timestamp-timedelta(minutes=agg_interval)
         )
@@ -56,9 +59,9 @@ def fetchRecords(queue_name,timestamp,agg_interval):
 
     return geo_dict
 
-def surge(deman,supply,max_surge):
+def surge(demand,supply,max_surge):
     coeff = 1-max_surge
-    x = float(geo_demand[area_hash])/float(geo_supply[area_hash])
+    x = float(demand)/float(supply)
     return max_surge + coeff * math.exp((1-x)/2)
 
 def compute_areawise_surge(geo_demand,geo_supply,max_surge):
@@ -71,9 +74,11 @@ def compute_areawise_surge(geo_demand,geo_supply,max_surge):
     return surge_dict
 
 def update_surge_table(geo_surge,geo_demand,geo_supply):
+    surge_table = "public.data_service_region_surge"
+
     logger.info("Truncating the table...")
     cur = rds_client.cursor()
-    cur.execute("TRUNCATE v1.geo_area_surge;")
+    cur.execute("TRUNCATE {};".format(surge_table))
     rds_client.commit()
     logger.info("Table truncated successfully.")
 
@@ -81,8 +86,8 @@ def update_surge_table(geo_surge,geo_demand,geo_supply):
     ctr = 0
     for area_hash in geo_surge:
         supply = geo_supply[area_hash] if area_hash in geo_supply else 0
-        cur.execute("INSERT INTO v1.geo_area_surge (geo_hash,demand,supply,surge) \
-        VALUES ('{}',{},{},{})".format(area_hash, geo_demand[area_hash], supply, geo_surge[area_hash]))
+        cur.execute("INSERT INTO {} (geo_hash,demand,supply,surge) VALUES ('{}',\
+        {},{},{})".format(surge_table,area_hash, geo_demand[area_hash], supply, geo_surge[area_hash]))
         ctr += 1
         if ctr%50==0:
             rds_client.commit()
@@ -120,3 +125,4 @@ if __name__ == "__main__":
 
         logger.info("Sleeping for {} seconds...".format(run_freq))
         time.sleep(run_freq)
+
