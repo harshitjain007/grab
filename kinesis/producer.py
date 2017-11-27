@@ -25,14 +25,16 @@ def writeToQueue(queue_name,records):
     logger.info('SucessWrites:{}  FailedWrites:{} Shards:{}'.format(success_cnt,fail_cnt,str(list(shards))))
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print "\n Frequency parameter missing \n eg. $ python demand_producer.py 10 \n"
+    total_params = 3
+    params_given = len(sys.argv)
+    if params_given != total_params+1:
+        logger.error("Missing arguments. Required {} given {}".format(total_params,params_given))
         sys.exit(2)
 
     skip_header = True
     in_csv = sys.argv[1]
-    write_freq = int(sys.argv[2])
-    queue_name = sys.argv[3]
+    queue_name = sys.argv[2]
+    write_freq = int(sys.argv[3])
 
     with open(in_csv, "rbU") as f:
         reader = csv.reader(f)
