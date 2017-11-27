@@ -61,12 +61,12 @@
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           zoom: 13,
-          center: {lat: 37.775, lng: -122.434},
+          center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'satellite'
         });
 
         heatmap = new google.maps.visualization.HeatmapLayer({
-          data: getPoints(),
+          data: fetchPoints(),
           map: map
         });
       }
@@ -83,13 +83,20 @@
         heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
       }
 
-      function fetchPoins(){
-        $.ajax({
-          url: "/data/surge/real_time",
-          success: function(result){
-                console.log(result);
-            }
-          });
+      function fetchPoints(){
+        resp = $.ajax({
+          type:"GET",
+          url: "/data/surge/realtime",
+          async: false
+        }).responseText;
+        arr = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          obj = JSON.parse(arr[i]);
+          console.log(obj.lat);
+          ret.push(new google.maps.LatLng(obj.lng,obj.lat));
+        }
+        return ret;
       }
       // Heatmap data: 500 Points
       function getPoints() {
@@ -107,3 +114,4 @@
     </script>
   </body>
 </html>
+

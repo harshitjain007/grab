@@ -1,4 +1,5 @@
 webserver/django/grab/settings.py
+webserver/django/data_service/migrations
 accessKeys.csv
 data/*
 conf.json
