@@ -10,7 +10,7 @@ class RegionSurge(models.Model):
     geo_hash = models.CharField(max_length=32)
     demand = models.IntegerField()
     supply = models.IntegerField()
-    surge = models.FloadField()
+    surge = models.FloatField()
 
     def __str__(self):
         latlng = geohash.decode(self.geo_hash)

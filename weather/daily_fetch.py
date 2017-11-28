@@ -24,6 +24,7 @@ for data in hourly_data:
     temp = data["tempm"]
     humi = data["hum"]
     wspd = data["wspdm"]
+    print dt,hour,temp,humi,wspd
     query = "insert into public.data_service_hourlyweatherdata \
     (hour,date,temp_celsius,humidity_percent,windspeed_kmph) values \
     ({},{},{},{},{}) on conflict do nothing".format(hour,dt,temp,humi,wspd)
