@@ -1,7 +1,7 @@
 import json
 import requests
 import psycopg2
-from datetime import datetime,timedelta
+import datetime
 
 conf_file = open("/home/ec2-user/conf.json","r")
 conf = json.loads(conf_file.read())
@@ -12,8 +12,8 @@ rds_client = psycopg2.connect(database=conf["db"], user=conf["user"],\
             password=conf["password"], host=conf["host"], port=conf["port"])
 cur = rds_client.cursor()
 
-now = datetime.now()
-yesterday = now - timedelta(hours=24)
+now = datetime.datetime.now()
+yesterday = now - datetime.timedelta(hours=24)
 
 resp = requests.post(hist_data_url.format(yesterday.strftime("%Y%m%d")))
 payload = json.loads(resp.content)
@@ -29,3 +29,4 @@ for data in hourly_data:
     (%s,%s,%s,%s,%s) on conflict do nothing"
     cur.execute(query,(hour,dt,temp,humi,wspd))
 rds_client.commit()
+

@@ -7,12 +7,12 @@ conf_file = open("/home/ec2-user/conf.json","r")
 conf = json.loads(conf_file.read())
 conf_file.close()
 
-hist_data_url = "http://api.wunderground.com/api/b44e472e7b8b1828/history_201711{}/q/NY/New_York.json"
+hist_data_url = "http://api.wunderground.com/api/b44e472e7b8b1828/history_2017110{}/q/NY/New_York.json"
 rds_client = psycopg2.connect(database=conf["db"], user = conf["user"],\
             password = conf["password"], host = conf["host"], port = conf["port"])
 cur = rds_client.cursor()
 
-for i in range(10,28):
+for i in range(1,10):
     resp = requests.post(hist_data_url.format(i))
     payload = json.loads(resp.content)
     hourly_data = payload["history"]["observations"]

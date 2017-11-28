@@ -43,3 +43,13 @@ class HourlyWeatherData(models.Model):
     temp_celsius = models.FloatField(null=True)
     humidity_percent = models.FloatField(null=True)
     windspeed_kmph = models.FloatField(null=True)
+
+    def __str__(self):
+        ret = {
+            "date":str(self.date),
+            "hour":self.hour,
+            "temp":self.temp_celsius,
+            "humid":self.humidity_percent,
+            "wspd":self.windspeed_kmph
+        }
+        return json.dumps(ret)
