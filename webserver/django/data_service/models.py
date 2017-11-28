@@ -40,6 +40,6 @@ class HourlyWeatherData(models.Model):
 
     hour = models.IntegerField()
     date = models.DateField()
-    temp_celsius = models.FloatField()
-    humidity_percent = models.FloatField()
-    windspeed_kmph = models.FloatField()
+    temp_celsius = models.FloatField(null=True)
+    humidity_percent = models.FloatField(null=True)
+    windspeed_kmph = models.FloatField(null=True)
