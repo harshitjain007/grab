@@ -27,4 +27,3 @@ for i in range(10,28):
         (%s,%s,%s,%s,%s) on conflict do nothing"
         cur.execute(query,(int(hour),dt,temp,humi,wspd))
     rds_client.commit()
-

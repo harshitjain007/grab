@@ -19,14 +19,13 @@ resp = requests.post(hist_data_url.format(yesterday.strftime("%Y%m%d")))
 payload = json.loads(resp.content)
 hourly_data = payload["history"]["observations"]
 for data in hourly_data:
-    dt = yesterday.strftime("%Y-%m-%d")
-    hour = data["utcdate"]["hour"]
+    dt = datetime.date(yesterday.year,yesterday.month,yesterday.day)
+    hour = int(data["utcdate"]["hour"])
     temp = data["tempm"]
-    humi = data["hum"]
+    humi = None if data["hum"]=="N/A" else data["hum"]
     wspd = data["wspdm"]
-    print dt,hour,temp,humi,wspd
     query = "insert into public.data_service_hourlyweatherdata \
     (hour,date,temp_celsius,humidity_percent,windspeed_kmph) values \
-    ({},{},{},{},{}) on conflict do nothing".format(hour,dt,temp,humi,wspd)
-    cur.execute(query)
+    (%s,%s,%s,%s,%s) on conflict do nothing"
+    cur.execute(query,(hour,dt,temp,humi,wspd))
 rds_client.commit()
