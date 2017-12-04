@@ -5,4 +5,4 @@ data/*
 conf.json
 *.pyc
 *.sqlite3
-
+*DS_Store
