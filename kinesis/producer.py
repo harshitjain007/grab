@@ -34,7 +34,7 @@ if __name__ == "__main__":
     skip_header = True
     in_csv = sys.argv[1]
     queue_name = sys.argv[2]
-    write_freq = int(sys.argv[3])
+    sleep_time = int(sys.argv[3])
 
     with open(in_csv, "rbU") as f:
         reader = csv.reader(f)
@@ -43,8 +43,8 @@ if __name__ == "__main__":
         rows=1
         rec_list=[]
         for row in reader:
-            hash_value = geohash.encode(Decimal(row[5]), Decimal(row[6]), 6)
-            pay_load = {"hash":hash_value,"lat":row[5],"long":row[6],"ts":datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+            hash_value = geohash.encode(Decimal(row[6]), Decimal(row[5]), 6)
+            pay_load = {"hash":hash_value,"lat":row[6],"long":row[5],"ts":datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             rec_list.append({
                 'Data': json.dumps(pay_load),
                 'PartitionKey':'p1'
@@ -54,5 +54,4 @@ if __name__ == "__main__":
             if rows%100==0:
                 writeToQueue(queue_name,rec_list)
                 rec_list = []
-                time.sleep(write_freq)
-
+                time.sleep(sleep_time)

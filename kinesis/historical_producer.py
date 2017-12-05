@@ -29,7 +29,6 @@ def writeToDB(rec_list):
         if ctr%50==0:
             rds_client.commit()
     rds_client.commit()
-    sys.exit(0)
 
 def dd(x):
     if x<10: return "0"+str(x)
@@ -55,9 +54,9 @@ if __name__ == "__main__":
         rows=randint(500,700)
         rec_list=[]
         for row in reader:
-            hash_value = geohash.encode(Decimal(row[5]), Decimal(row[6]), 6)
+            hash_value = geohash.encode(Decimal(row[6]), Decimal(row[5]), 6)
             pay_load = {
-                "hash":hash_value, "lat":row[5],"long":row[6],
+                "hash":hash_value, "lat":row[6],"lng":row[5],
                 "ts":"{}-{}-{} {}:{}:{}".format(2017,11,dd(d),dd(h),dd(randint(m,m+10)),randint(10,59))
                 }
             rec_list.append(pay_load)
