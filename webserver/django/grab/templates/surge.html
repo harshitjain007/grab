@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 2,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'terrain'
+        });
+
+        resp = $.ajax({
+          type:"GET",
+          url: "/data/surge/historical?date=2017-11-11-11",
+          async: false
+        }).responseText;
+        point_list = JSON.parse(resp);
+        for (var point in point_list){
+          var rad = point.demand-point.supply;
+          var fColor = rad>0 ? '#FF0000' : '#00FF00';
+          var cityCircle = new google.maps.Circle({
+              strokeColor: '#FF0000',
+              strokeOpacity: 0.8,
+              strokeWeight: 2,
+              fillColor: fColor,
+              fillOpacity: 0.35,
+              map: map,
+              center: {lat:point.lat,lng:point.lng},
+              radius: Math.abs(rad) * 100
+            });
+        }
+      }
+
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN4_ZVNmxSYFexf86NgQxild6LOR1h5tE&libraries=visualization&callback=initMap">
+    </script>
+  </body>
+</html>

@@ -41,6 +41,7 @@ class HourlyDemandSupply(models.Model):
     hour = models.IntegerField()
     date = models.DateField()
 
+
 class HourlyWeatherData(models.Model):
     class Meta:
         unique_together = (('hour', 'date'),)

@@ -29,8 +29,7 @@ def writeToDB(rec_list):
 
     ctr = 0
     for rec in rec_list:
-        is_demand = True if randint(0,1)==0 else False
-        cur.execute(query,(rec["lat"],rec["lng"],rec["hash"],is_demand,rec["ts"]))
+        cur.execute(query,(rec["lat"],rec["lng"],rec["hash"],rec["is_demand"],rec["ts"]))
         ctr += 1
         if ctr%50==0:
             rds_client.commit()
@@ -63,8 +62,9 @@ if __name__ == "__main__":
             skip -= 1
             if skip>0:continue
             hash_value = geohash.encode(Decimal(row[6]), Decimal(row[5]), 6)
+            is_demand = True if randint(0,1)==0 else False
             pay_load = {
-                "hash":hash_value, "lat":row[6],"lng":row[5],
+                "hash":hash_value, "lat":row[6],"lng":row[5],"is_demand":is_demand,
                 "ts":"{}-{}-{} {}:{}:{}".format(2017,11,dd(d),dd(h),dd(randint(m,m+9)),randint(10,59))
                 }
             rec_list.append(pay_load)
