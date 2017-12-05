@@ -24,7 +24,7 @@ logger.setLevel(logging.INFO)
 def writeToDB(rec_list):
     cur = rds_client.cursor()
 
-    logger.info("Inserting the records into the table...")
+    logger.info("Inserting the {} records into the table...".format(rec_list[0]["ts"]))
     query = "INSERT INTO public.data_service_demandsupply (lat,lng,geo_hash,is_demand,ts) VALUES (%s,%s,%s,%s,%s)"
 
     ctr = 0
