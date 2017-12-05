@@ -41,7 +41,7 @@ def dd(x):
     else: return str(x)
 
 if __name__ == "__main__":
-    total_params = 1
+    total_params = 2
     params_given = len(sys.argv)
     if params_given != total_params+1:
         logger.error("Missing arguments. Required {} given {}".format(total_params,params_given))
@@ -49,10 +49,10 @@ if __name__ == "__main__":
 
     skip_header = True
     in_csv = sys.argv[1]
-
+    skip = int(sys.argv[2])
     m=0
     h=0
-    d=1
+    d=24
     with open(in_csv, "rbU") as f:
         reader = csv.reader(f)
         if skip_header: next(reader, None)
@@ -60,6 +60,8 @@ if __name__ == "__main__":
         rows=randint(500,700)
         rec_list=[]
         for row in reader:
+            skip -= 1
+            if skip>0:continue
             hash_value = geohash.encode(Decimal(row[6]), Decimal(row[5]), 6)
             pay_load = {
                 "hash":hash_value, "lat":row[6],"lng":row[5],
