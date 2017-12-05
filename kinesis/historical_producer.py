@@ -1,4 +1,5 @@
 import sys,time
+import psycopg2
 import geohash
 import json,csv
 import boto3
@@ -15,11 +16,16 @@ conf_file.close()
 rds_client = psycopg2.connect(database=conf["db"], user = conf["user"],\
             password = conf["password"], host = conf["host"], port = conf["port"])
 
+#logging
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 def writeToDB(rec_list):
     cur = rds_client.cursor()
 
     logger.info("Inserting the records into the table...")
-    query = "INSERT INTO public.data_service_demand_supply (lat,lng,geo_hash,is_demand,ts) VALUES (%s,%s,%s,%s,%s)"
+    query = "INSERT INTO public.data_service_demandsupply (lat,lng,geo_hash,is_demand,ts) VALUES (%s,%s,%s,%s,%s)"
 
     ctr = 0
     for rec in rec_list:
@@ -57,7 +63,7 @@ if __name__ == "__main__":
         for row in reader:
             hash_value = geohash.encode(Decimal(row[5]), Decimal(row[6]), 6)
             pay_load = {
-                "hash":hash_value, "lat":row[5],"long":row[6],
+                "hash":hash_value, "lat":row[5],"lng":row[6],
                 "ts":"{}-{}-{} {}:{}:{}".format(2017,11,dd(d),dd(h),dd(randint(m,m+10)),randint(10,59))
                 }
             rec_list.append(pay_load)
