@@ -52,7 +52,7 @@ if __name__ == "__main__":
     skip = int(sys.argv[2])
     m=0
     h=0
-    d=24
+    d=1
     with open(in_csv, "rbU") as f:
         reader = csv.reader(f)
         if skip_header: next(reader, None)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
             hash_value = geohash.encode(Decimal(row[6]), Decimal(row[5]), 6)
             pay_load = {
                 "hash":hash_value, "lat":row[6],"lng":row[5],
-                "ts":"{}-{}-{} {}:{}:{}".format(2017,11,dd(d),dd(h),dd(randint(m,m+10)),randint(10,59))
+                "ts":"{}-{}-{} {}:{}:{}".format(2017,11,dd(d),dd(h),dd(randint(m,m+9)),randint(10,59))
                 }
             rec_list.append(pay_load)
             rows -= 1
