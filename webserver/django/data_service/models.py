@@ -22,7 +22,7 @@ class RegionSurge(models.Model):
             "lat":latlng[0],
             "lng":latlng[1]
         }
-        return ret
+        return json.dumps(ret)
 
 class DemandSupply(models.Model):
     lat = models.CharField(max_length=32)

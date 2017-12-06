@@ -5,13 +5,14 @@ from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
 from models import *
 from datetime import datetime
+import json
 
 def index(request):
     return JsonResponse({"A":"Hello, world. You're at the polls index."})
 
 def get_real_time_surge(request):
     objects = RegionSurge.objects.all()
-    ret = ret = [str(obj) for obj in objects]
+    ret = ret = [json.loads(str(obj)) for obj in objects]
     return JsonResponse(ret,safe=False)
 
 def get_historical_surge(request):
