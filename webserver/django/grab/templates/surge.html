@@ -79,36 +79,6 @@
     <script>
       var map1,map2,map3;
       var map1Data=[],map2Data=[],map3Data=[];
-      function fetch(){
-        clearMap(3);
-        mnth = $("#month").val();
-        day = $('#day').val();
-        hr = $('#hour').val();
-        hit_url = "/data/surge/historical?date=2017-"+mnth+"-"+day+"-"+hr
-        resp = $.ajax({
-          type:"GET",
-          url: hit_url,
-          async: false
-        }).responseText;
-
-        map3Data = JSON.parse(resp);
-
-        for (var i=0;i<point_list.length;++i){
-          var rad = point_list[i].demand-point_list[i].supply;
-          var fColor = rad>0 ? '#FF0000' : '#00FF00';
-          var cityCircle = new google.maps.Circle({
-              strokeColor: '#000000',
-              strokeOpacity: 0.2,
-              strokeWeight: 1,
-              fillColor: fColor,
-              fillOpacity: 0.65,
-              map: map3,
-              center: {lat:point_list[i].lat,lng:point_list[i].lng},
-              radius: Math.abs(rad) * 100
-            });
-        }
-      }
-
       function initMap() {
         map1 = new google.maps.Map(document.getElementById('map1'), {
           zoom: 13,
@@ -126,6 +96,76 @@
           mapTypeId: 'terrain'
         });
         fetch();
+      }
+
+      function fetch(){
+        clearMap(3);
+        mnth = $("#month").val();
+        day = $('#day').val();
+        hr = $('#hour').val();
+        hit_url = "/data/surge/historical?date=2017-"+mnth+"-"+day+"-"+hr
+        resp = $.ajax({
+          type:"GET",
+          url: hit_url,
+          async: false
+        }).responseText;
+
+        data = JSON.parse(resp);
+
+        for (var i=0;i<data.length;++i){
+          var rad = data[i].demand-data[i].supply;
+          var fColor = rad>0 ? '#FF0000' : '#00FF00';
+          var cityCircle = new google.maps.Circle({
+              strokeColor: '#000000',
+              strokeOpacity: 0.2,
+              strokeWeight: 1,
+              fillColor: fColor,
+              fillOpacity: 0.65,
+              map: map3,
+              center: {lat:data[i].lat,lng:data[i].lng},
+              radius: Math.abs(rad) * 100
+            });
+            map3Data.push(cityCircle);
+          }
+      }
+
+      function refresh(){
+        clearMap(1);clearMap(2);
+        resp = $.ajax({
+          type:"GET",
+          url: "/data/surge/realtime",
+          async: false
+        }).responseText;
+
+        data = JSON.parse(resp);
+        for (var i=0;i<data.length;++i){
+          var rad1 = data[i].surge * 100;
+          var rad2 = data[i].demand-data[i].supply;
+          var fColor = rad2>0 ? '#FF0000' : '#00FF00';
+
+          var cityCircle1 = new google.maps.Circle({
+              strokeColor: '#000000',
+              strokeOpacity: 0.2,
+              strokeWeight: 1,
+              fillColor: '#00DDDD',
+              fillOpacity: 0.65,
+              map: map1,
+              center: {lat:data[i].lat,lng:data[i].lng},
+              radius: rad1
+            });
+          var cityCircle2 = new google.maps.Circle({
+              strokeColor: '#000000',
+              strokeOpacity: 0.2,
+              strokeWeight: 1,
+              fillColor: fColor,
+              fillOpacity: 0.65,
+              map: map2,
+              center: {lat:data[i].lat,lng:data[i].lng},
+              radius: Math.abs(rad2) * 100
+            });
+          map1Data.push(cityCircle1);
+          map2Data.push(cityCircle2);
+          }
       }
 
       function clearMap(mapNum) {

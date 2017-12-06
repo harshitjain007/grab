@@ -11,7 +11,7 @@ def index(request):
 
 def get_real_time_surge(request):
     objects = RegionSurge.objects.all()
-    ret = [str(obj) for obj in objects]
+    ret = ret = [str(obj) for obj in objects]
     return JsonResponse(ret,safe=False)
 
 def get_historical_surge(request):
