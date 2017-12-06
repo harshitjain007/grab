@@ -130,7 +130,8 @@
       }
 
       function refresh(){
-        clearMap(1);clearMap(2);
+        clearMap(1);
+        clearMap(2);
         resp = $.ajax({
           type:"GET",
           url: "/data/surge/realtime",
@@ -147,10 +148,10 @@
               strokeColor: '#000000',
               strokeOpacity: 0.2,
               strokeWeight: 1,
-              fillColor: '#00DDDD',
-              fillOpacity: 0.65,
+              fillColor: '#f5cc50',
+              fillOpacity: 0.85,
               map: map1,
-              center: {lat:data[i].lat,lng:data[i].lng},
+              center: {lat:data[i].lng,lng:data[i].lat},
               radius: rad1
             });
           var cityCircle2 = new google.maps.Circle({
@@ -160,7 +161,7 @@
               fillColor: fColor,
               fillOpacity: 0.65,
               map: map2,
-              center: {lat:data[i].lat,lng:data[i].lng},
+              center: {lat:data[i].lng,lng:data[i].lat},
               radius: Math.abs(rad2) * 100
             });
           map1Data.push(cityCircle1);
@@ -180,6 +181,7 @@
           map3Data = []
         }
       }
+      setInterval(refresh, 60*1000);
     </script>
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN4_ZVNmxSYFexf86NgQxild6LOR1h5tE&libraries=visualization&callback=initMap">

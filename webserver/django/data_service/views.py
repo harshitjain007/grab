@@ -53,7 +53,26 @@ def get_weather_traffic_data(request):
     year = int(date_obj[0])
     mm = int(date_obj[1])
     dd = int(date_obj[2])
-    objects = HourlyWeatherData.objects.filter(date=datetime(year, mm, dd))
-    ret = [str(obj) for obj in objects]
+    wcursor = HourlyWeatherData.objects.filter(date=datetime(year, mm, dd)).order_by("hour")
+
+    query = '''select 1 as id,extract(hour from ts),
+    count(case is_demand when True then 1 else null end) as demand,
+    count(case is_demand when False then 1 else null end) as supply
+    from public.data_service_demandsupply
+    where extract(day from ts)='{}' and extract(month from ts)='{}' and
+    extract(year from ts)='{}' group by extract(hour from ts)
+    order by extract(hour from ts)'''.format(dd,mm,year)
+    cursor = DemandSupply.objects.raw(query)
+
+    ret = []
+    for obj,wea in zip(cursor,wcursor):
+        ret.append({
+            "hour":wea.hour,
+            "wspd":wea.windspeed_kmph,
+            "temp":wea.temp_celsius,
+            "hum":wea.humidity_percent,
+            "demand":obj.demand,
+            "supply":obj.supply
+        })
     return JsonResponse(ret,safe=False)
 # Create your views here.
