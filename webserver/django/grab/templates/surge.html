@@ -35,6 +35,7 @@
     <h1 class="heading">Demand Supply & Surge</h1>
     <div>
       <h2 style="margin-left:15px;margin-bottom:10px;">Real Time</h2>
+      <center><button onclick="refresh()">Refresh</button></center>
       <div id="map1" class="map-small"></div>
       <div id="map2" class="map-small"></div>
     </div>
@@ -77,8 +78,9 @@
     </div>
     <script>
       var map1,map2,map3;
+      var map1Data=[],map2Data=[],map3Data=[];
       function fetch(){
-
+        clearMap(3);
         mnth = $("#month").val();
         day = $('#day').val();
         hr = $('#hour').val();
@@ -89,12 +91,7 @@
           async: false
         }).responseText;
 
-        point_list = JSON.parse(resp);
-        map3 = new google.maps.Map(document.getElementById('map3'), {
-          zoom: 13,
-          center: {lat: 40.785091, lng: -73.968285},
-          mapTypeId: 'terrain'
-        });
+        map3Data = JSON.parse(resp);
 
         for (var i=0;i<point_list.length;++i){
           var rad = point_list[i].demand-point_list[i].supply;
@@ -123,13 +120,25 @@
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'terrain'
         });
-
         map3 = new google.maps.Map(document.getElementById('map3'), {
           zoom: 13,
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'terrain'
         });
         fetch();
+      }
+
+      function clearMap(mapNum) {
+        if (mapNum==1) {
+          for(var i=0;i<map1Data.length;++i) map1Data[i].setMap(null);
+          map1Data = []
+        } else if (mapNum==2){
+          for(var i=0;i<map2Data.length;++i) map2Data[i].setMap(null);
+          map2Data = []
+        } else if (mapNum==3){
+          for(var i=0;i<map3Data.length;++i) map3Data[i].setMap(null);
+          map3Data = []
+        }
       }
     </script>
     <script async defer
