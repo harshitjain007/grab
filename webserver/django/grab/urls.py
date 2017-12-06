@@ -19,6 +19,6 @@ from grab import views
 urlpatterns = [
     url(r'^data/', include('data_service.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^surge/', views.surge),
+    url(r'^surge', views.surge),
     url(r'^',views.index),
 ]
