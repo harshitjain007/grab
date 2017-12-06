@@ -76,8 +76,9 @@
       <div id="map3" class="map-large"></div>
     </div>
     <script>
-      var map1,map2;
+      var map1,map2,map3;
       function fetch(){
+
         mnth = $("#month").val();
         day = $('#day').val();
         hr = $('#hour').val();
@@ -89,6 +90,12 @@
         }).responseText;
 
         point_list = JSON.parse(resp);
+        map3 = new google.maps.Map(document.getElementById('map3'), {
+          zoom: 13,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'terrain'
+        });
+
         for (var i=0;i<point_list.length;++i){
           var rad = point_list[i].demand-point_list[i].supply;
           var fColor = rad>0 ? '#FF0000' : '#00FF00';
@@ -98,7 +105,7 @@
               strokeWeight: 1,
               fillColor: fColor,
               fillOpacity: 0.65,
-              map: map1,
+              map: map3,
               center: {lat:point_list[i].lat,lng:point_list[i].lng},
               radius: Math.abs(rad) * 100
             });
@@ -107,18 +114,18 @@
 
       function initMap() {
         map1 = new google.maps.Map(document.getElementById('map1'), {
-          zoom: 6,
+          zoom: 13,
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'terrain'
         });
         map2 = new google.maps.Map(document.getElementById('map2'), {
-          zoom: 6,
+          zoom: 13,
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'terrain'
         });
 
         map3 = new google.maps.Map(document.getElementById('map3'), {
-          zoom: 6,
+          zoom: 13,
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'terrain'
         });
