@@ -9,3 +9,6 @@ def index(request):
 
 def surge(request):
     return render(request, 'surge.html')
+
+def weather(request):
+    return render(request, 'weather.html')

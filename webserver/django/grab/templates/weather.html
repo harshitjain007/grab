@@ -73,6 +73,45 @@
       google.charts.load('current', {packages: ['line']});
       google.charts.setOnLoadCallback(drawChart);
 
+      function prepareChart(div,data,key1,key2,axis1Label,axis2Label,titl){
+        var mnth = parseInt($("#month").val());
+        var day = parseInt($('#day').val());
+        var hr = parseInt($('#hour').val());
+
+        var arr = [];
+        for(var i=0;i<data.length;++i) {
+            arr.push([new Date(2017,mnth-1,day,hr,30,0),data[i][key1],data[i][key2]]);
+        }
+
+        var options = {
+          chart: {
+            title:titl
+          },
+          series: {
+            0: {axis: 0},
+            1: {axis: 1}
+          },
+          vAxes: {
+            0: {
+              label: axis1Label,
+              gridlines:{color:'#110000'}
+            },
+            1: {
+              label: axis2Label,
+              gridlines:{color:'#FFF'}
+            }
+          }
+        };
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('datetime', 'day');
+        dataTable.addColumn('number', axis1Label);
+        dataTable.addColumn('number', axis2Label);
+        dataTable.addRows(arr);
+
+        var materialChart = new google.charts.Line(div);
+        materialChart.draw(dataTable, options);
+      }
+
       function drawChart() {
           var button = document.getElementById('change-chart');
           var chartDiv = document.getElementById('chart_div');
@@ -81,55 +120,14 @@
           mnth = $("#month").val();
           day = $('#day').val();
           hr = $('#hour').val();
-          hit_url = "/data/weather/date=2017-"+mnth+"-"+day+"-"+hr
-          // resp = $.ajax({
-          //   type:"GET",
-          //   url: hit_url,
-          //   async: false
-          // }).responseText;
-
-          var data = new google.visualization.DataTable();
-          data.addColumn('datetime', 'day');
-          data.addColumn('number', "Temperature");
-          data.addColumn('number', "Demand");
-          // data = JSON.parse(resp);
-
-          data.addRows([
-            [new Date(2014, 0,17,2,30,0),  -.5,  5],
-            [new Date(2014, 0,17,3,40,0),   .4,  8.7],
-          ]);
-
-      var materialOptions = {
-        chart: {
-          title: 'Average Temperatures and Daylight in Iceland Throughout the Year'
-        },
-        series: {
-          // Gives each series an axis name that matches the Y-axis below.
-          0: {axis: 'Temps'},
-          1: {axis: 'Daylight'}
-        },
-        vAxes: {
-          // Adds labels to each axis; they don't have to match the axis names.
-          Temps: {
-            label: 'Temps (Celsius)',
-            gridlines:{
-              color:'#110000'
-            }
-          },
-          Daylight: {
-            label: 'Daylight',
-            gridlines:{
-              color:'#FFF'
-            }
-          }
-
-        }
-      };
-
-      var materialChart = new google.charts.Line(chartDiv);
-      var materialChart2 = new google.charts.Line(chartDiv2);
-      materialChart.draw(data, materialOptions);
-      materialChart2.draw(data, materialOptions);
+          hit_url = "/data/weather/?date=2017-"+mnth+"-"+day+"-"+hr
+          resp = $.ajax({
+            type:"GET",
+            url: hit_url,
+            async: false
+          }).responseText;
+          ar = JSON.parse(resp);
+          prepareChart(chartDiv,ar,'temp','demand','Temp','Demand','');
     }
     </script>
   </body>
