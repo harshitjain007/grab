@@ -103,7 +103,7 @@
         mnth = $("#month").val();
         day = $('#day').val();
         hr = $('#hour').val();
-        hit_url = "/data/surge/historical?date=2017-"+mnth+"-"+day+"-"+hr
+        hit_url = "/data/weather/date=2017-"+mnth+"-"+day+"-"+hr
         resp = $.ajax({
           type:"GET",
           url: hit_url,
