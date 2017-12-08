@@ -10,9 +10,7 @@ from sets import Set
 kinesis_client = boto3.client("kinesis")
 
 #logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = None
 
 def writeToQueue(queue_name,records):
     resp = kinesis_client.put_records(Records=records,StreamName=queue_name)
@@ -25,16 +23,20 @@ def writeToQueue(queue_name,records):
     logger.info('SucessWrites:{}  FailedWrites:{} Shards:{}'.format(success_cnt,fail_cnt,str(list(shards))))
 
 if __name__ == "__main__":
-    total_params = 3
+    total_params = 4
     params_given = len(sys.argv)
-    if params_given != total_params+1:
-        logger.error("Missing arguments. Required {} given {}".format(total_params,params_given))
+    if params_given-1 != total_params:
+        print("Missing arguments. Required {} given {}".format(total_params,params_given-1))
         sys.exit(2)
 
     skip_header = True
     in_csv = sys.argv[1]
     queue_name = sys.argv[2]
     sleep_time = float(sys.argv[3])
+    log_file = sys.argv[4]
+
+    logging.basicConfig(filename=log_file,format='%(asctime)s - %(levelname)s - %(message)s',level=logging.INFO)
+    logger=logging.getLogger(__name__)
 
     with open(in_csv, "rbU") as f:
         reader = csv.reader(f)
