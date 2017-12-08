@@ -17,12 +17,7 @@ conf_file.close()
 rds_client = psycopg2.connect(database=conf["db"], user = conf["user"],\
             password = conf["password"], host = conf["host"], port = conf["port"])
 kinesis_client = boto3.client("kinesis")
-
-#logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
+logger = None
 
 def getList(rec_list,end_time,is_demand):
     store_list = []
@@ -83,15 +78,19 @@ def writeToDB(rec_list):
     rds_client.commit()
 
 if __name__ == "__main__":
-    total_params = 3
+    total_params = 4
     params_given = len(sys.argv)
     if params_given != total_params+1:
-        logger.error("Missing arguments. Required {} given {}".format(total_params,params_given))
+        print("Missing arguments. Required {} given {}".format(total_params,params_given-1))
         sys.exit(2)
 
     demand_queue = sys.argv[1]
     supply_queue = sys.argv[2]
     agg_interval = int(sys.argv[3])
+    log_file = sys.argv[4]
+
+    logging.basicConfig(filename=log_file,format='%(asctime)s - %(levelname)s - %(message)s',level=logging.INFO)
+    logger=logging.getLogger(__name__)
 
     end_time = datetime.now()
     start_time = end_time - timedelta(minutes=agg_interval)
@@ -101,3 +100,5 @@ if __name__ == "__main__":
 
     logger.info("Fetching supply records...")
     geo_supply = fetchAndStoreRecords(supply_queue,start_time,end_time,False)
+
+    logger.info("================================\n")
