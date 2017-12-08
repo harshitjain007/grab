@@ -16,11 +16,7 @@ conf_file.close()
 rds_client = psycopg2.connect(database=conf["db"], user = conf["user"],\
             password = conf["password"], host = conf["host"], port = conf["port"])
 kinesis_client = boto3.client("kinesis")
-
-#logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = None
 
 def populateCount(geo_dict,rec_list,end_time):
     for rec in rec_list:
@@ -101,34 +97,35 @@ if __name__ == "__main__":
     total_params = 5
     params_given = len(sys.argv)
     if params_given != total_params+1:
-        logger.error("Missing arguments. Required {} given {}".format(total_params,params_given))
+        print("Missing arguments. Required {} given {}".format(total_params,params_given))
         sys.exit(2)
 
     demand_queue = sys.argv[1]
     supply_queue = sys.argv[2]
-    run_freq = int(sys.argv[3])
-    agg_interval = int(sys.argv[4])
-    max_surge = int(sys.argv[5])
+    agg_interval = int(sys.argv[3])
+    max_surge = int(sys.argv[4])
+    log_file = sys.argv[5]
 
-    while True:
-        end_time = datetime.now()
-        start_time = end_time - timedelta(minutes=agg_interval)
+    logging.basicConfig(filename=log_file,format='%(asctime)s - %(levelname)s - %(message)s',level=logging.INFO)
+    logger=logging.getLogger(__name__)
 
-        logger.info("Fetching demand records...")
-        geo_demand = fetchAndAggregateRecords(demand_queue,start_time,end_time)
-        logger.info("Total {} demand records fetched for {} geo_areas".format(sum(geo_demand.values()),len(geo_demand)))
+    end_time = datetime.now()
+    start_time = end_time - timedelta(minutes=agg_interval)
 
-        logger.info("Fetching supply records...")
-        geo_supply = fetchAndAggregateRecords(supply_queue,start_time,end_time)
-        logger.info("Total {} supply records fetched for {} geo_areas".format(sum(geo_supply.values()),len(geo_supply)))
+    logger.info("Fetching demand records...")
+    geo_demand = fetchAndAggregateRecords(demand_queue,start_time,end_time)
+    logger.info("Total {} demand records fetched for {} geo_areas".format(sum(geo_demand.values()),len(geo_demand)))
 
-        logger.info("Calculating surge for the areas...")
-        geo_surge = computeAreawiseSurge(geo_demand,geo_supply,max_surge)
-        logger.info("Surge calculation complete.")
+    logger.info("Fetching supply records...")
+    geo_supply = fetchAndAggregateRecords(supply_queue,start_time,end_time)
+    logger.info("Total {} supply records fetched for {} geo_areas".format(sum(geo_supply.values()),len(geo_supply)))
 
-        logger.info("Updating the surge table with {} records...".format(len(geo_surge)))
-        updateSurgeTable(geo_surge,geo_demand,geo_supply)
-        logger.info("Surge table updated successfully.")
+    logger.info("Calculating surge for the areas...")
+    geo_surge = computeAreawiseSurge(geo_demand,geo_supply,max_surge)
+    logger.info("Surge calculation complete.")
 
-        logger.info("Sleeping for {} seconds...".format(run_freq))
-        time.sleep(run_freq)
+    logger.info("Updating the surge table with {} records...".format(len(geo_surge)))
+    updateSurgeTable(geo_surge,geo_demand,geo_supply)
+    logger.info("Surge table updated successfully.")
+
+    logger.info("================================\n")
