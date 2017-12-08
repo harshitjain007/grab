@@ -73,7 +73,7 @@ def computeAreawiseSurge(geo_demand,geo_supply,max_surge):
     return surge_dict
 
 def updateSurgeTable(geo_surge,geo_demand,geo_supply):
-    surge_table = "public.data_service_region_surge"
+    surge_table = "public.data_service_regionsurge"
 
     logger.info("Truncating the table...")
     cur = rds_client.cursor()

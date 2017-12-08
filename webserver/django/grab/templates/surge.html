@@ -103,7 +103,7 @@
         mnth = $("#month").val();
         day = $('#day').val();
         hr = $('#hour').val();
-        hit_url = "/data/weather/date=2017-"+mnth+"-"+day+"-"+hr
+        hit_url = "/data/surge/historical?date=2017-"+mnth+"-"+day+"-"+hr
         resp = $.ajax({
           type:"GET",
           url: hit_url,
@@ -151,7 +151,7 @@
               fillColor: '#f5cc50',
               fillOpacity: 0.85,
               map: map1,
-              center: {lat:data[i].lng,lng:data[i].lat},
+              center: {lat:data[i].lat,lng:data[i].lng},
               radius: rad1
             });
           var cityCircle2 = new google.maps.Circle({
@@ -161,7 +161,7 @@
               fillColor: fColor,
               fillOpacity: 0.65,
               map: map2,
-              center: {lat:data[i].lng,lng:data[i].lat},
+              center: {lat:data[i].lat,lng:data[i].lng},
               radius: Math.abs(rad2) * 100
             });
           map1Data.push(cityCircle1);
