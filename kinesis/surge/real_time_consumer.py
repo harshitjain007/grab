@@ -7,6 +7,7 @@ import math
 import logging
 import psycopg2
 from decimal import *
+from random import randint
 from datetime import datetime, timedelta
 
 conf_file = open("/home/ec2-user/conf.json","r")
@@ -30,7 +31,7 @@ def getList(rec_list,end_time,is_demand):
         ts = datetime.strptime(data["ts"],"%Y-%m-%d %H:%M:%S")
         if ts > end_time: return store_list
         store_list.append({
-            "hash":data["hash"], "lat":data["lat"], "lng":data["long"], "is_demand":data["is_demand"] "ts":ts
+            "hash":data["hash"], "lat":data["lat"], "lng":data["long"], "is_demand":is_demand, "ts":ts
         })
     return store_list
 
@@ -48,7 +49,7 @@ def fetchAndStoreRecords(queue_name,start_time,end_time,is_demand):
     shard_itr_cd = shard_itr["ShardIterator"]
     resp = kinesis_client.get_records(ShardIterator=shard_itr_cd, Limit=100)
 
-    store_list = getList(resp["Records"],end_time,is_demand):
+    store_list = getList(resp["Records"],end_time,is_demand)
     if len(store_list)==0:return
     writeToDB(store_list)
 
@@ -63,7 +64,7 @@ def fetchAndStoreRecords(queue_name,start_time,end_time,is_demand):
         else: total_rec_cnt+=rec_cnt
         logger.info("Total records fetched:{}".format(total_rec_cnt))
 
-        r_list = getList(resp["Records"],end_time,is_demand):
+        r_list = getList(resp["Records"],end_time,is_demand)
         if len(r_list)==0: return
 
 def writeToDB(rec_list):

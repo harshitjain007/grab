@@ -34,7 +34,7 @@ if __name__ == "__main__":
     skip_header = True
     in_csv = sys.argv[1]
     queue_name = sys.argv[2]
-    sleep_time = int(sys.argv[3])
+    sleep_time = float(sys.argv[3])
 
     with open(in_csv, "rbU") as f:
         reader = csv.reader(f)
@@ -51,7 +51,6 @@ if __name__ == "__main__":
             })
             rows = rows+1
 
-            if rows%100==0:
-                writeToQueue(queue_name,rec_list)
-                rec_list = []
-                time.sleep(sleep_time)
+            writeToQueue(queue_name,rec_list)
+            rec_list = []
+            time.sleep(sleep_time)
