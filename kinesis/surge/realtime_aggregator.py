@@ -9,7 +9,7 @@ import psycopg2
 from decimal import *
 from datetime import datetime, timedelta
 
-conf_file = open("/home/ec2-user/conf.json","r")
+conf_file = open("/home/ec2-user/.conf/db_config.json","r")
 conf = json.loads(conf_file.read())
 conf_file.close()
 
@@ -34,7 +34,7 @@ def fetchAndAggregateRecords(queue_name,start_time,end_time):
     stream_info = kinesis_client.describe_stream(StreamName=queue_name)
     shard_id = stream_info["StreamDescription"]["Shards"][0]["ShardId"]
     logger.info("shard_id:{} ".format(shard_id))
-    
+
     shard_itr = kinesis_client.get_shard_iterator(
         StreamName=queue_name,
         ShardId=shard_id,
@@ -132,4 +132,3 @@ if __name__ == "__main__":
 
         logger.info("Sleeping for {} seconds...".format(run_freq))
         time.sleep(run_freq)
-
