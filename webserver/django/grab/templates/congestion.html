@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .heading{
+        text-align: center;
+        font-size: 40px;
+        margin: 5px;
+      }
+      .map-large {
+        height:600px;
+        width: 98%;
+        margin-left: 15px;
+        float: left;
+      }
+      select{
+        margin:15px;
+        float: left;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+  <body bgcolor="#f6f6f6">
+    <h1 class="heading">Traffic Congestion</h1>
+    <div>
+      <h2 style="margin-left:15px;margin-bottom:10px;">Real Time</h2>
+      <center><button onclick="refresh()">Refresh</button></center>
+      <div id="map1" class="map-large"></div>
+    </div>
+    <div>
+      <br><br><br>
+      <h2 style="margin-left:15px;margin-bottom:10px;">Historical</h2>
+      <select id="year">
+        <option value="">2017</option>
+      </select>
+      <select id="month">
+        <option selected="selected" value="11" >November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="day">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option><option selected="selected" value="24">24</option>
+        <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+        <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <select id="hour">
+        <option value="0">0</option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option selected="selected" value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">16</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option>
+      </select>
+      <button style="float:left;margin:15px" onclick="fetch()"> Go </button>
+      <div id="map2" class="map-large"></div>
+    </div>
+    <script>
+      var map1,map2,heatmap1,heatmap2;
+      var map1Data=[],map2Data=[];
+      function initMap() {
+        map1 = new google.maps.Map(document.getElementById('map1'), {
+          zoom: 11,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'satellite'
+        });
+        refresh();
+        map2 = new google.maps.Map(document.getElementById('map2'), {
+          zoom: 11,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'satellite'
+        });
+        fetchHistoricalData();
+      }
+
+      function refresh(){
+        resp = $.ajax({
+          type:"GET",
+          url: "/data/congestion/realtime",
+          async: false
+        }).responseText;
+
+        arr = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          obj = JSON.parse(arr[i]);
+          ret.push(new google.maps.LatLng(obj.lng,obj.lat));
+        }
+
+        if (heatmap1!=null){
+          heatmap1.setMap(null);
+        }
+        heatmap1 = new google.maps.visualization.HeatmapLayer({
+          data: ret,
+          map: map
+        });
+      }
+
+      function fetchHistoricalData(){
+        mnth = $("#month").val();
+        day = $('#day').val();
+        hr = $('#hour').val();
+        hit_url = "/data/congestion/historical?date=2017-"+mnth+"-"+day+"-"+hr
+        resp = $.ajax({
+          type:"GET",
+          url: hit_url,
+          async: false
+        }).responseText;
+
+        data = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          obj = JSON.parse(arr[i]);
+          ret.push(new google.maps.LatLng(obj.lng,obj.lat));
+        }
+        if (heatmap2!=null){
+          heatmap2.setMap(null);
+        }
+        heatmap2 = new google.maps.visualization.HeatmapLayer({
+          data: ret,
+          map: map
+        });
+      }
+
+      setInterval(refresh, 60*1000);
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN4_ZVNmxSYFexf86NgQxild6LOR1h5tE&libraries=visualization&callback=initMap">
+    </script>
+  </body>
+</html>

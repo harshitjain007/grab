@@ -43,9 +43,8 @@ def fetchAndStoreRecords(queue_name,start_time,end_time):
     shard_itr_cd = shard_itr["ShardIterator"]
     resp = kinesis_client.get_records(ShardIterator=shard_itr_cd, Limit=100)
 
-    store_list = getList(resp["Records"],end_time,is_demand)
-    if len(store_list)==0:return
-    writeToDB(store_list)
+    store_list = getList(resp["Records"],end_time)
+    if len(store_list)!=0: writeToDB(store_list)
 
     total_rec_cnt = len(resp["Records"])
     while resp["NextShardIterator"] is not None:
@@ -58,7 +57,7 @@ def fetchAndStoreRecords(queue_name,start_time,end_time):
         else: total_rec_cnt+=rec_cnt
         logger.info("Total records fetched:{}".format(total_rec_cnt))
 
-        r_list = getList(resp["Records"],end_time,is_demand)
+        r_list = getList(resp["Records"],end_time)
         if len(r_list)==0: return
         writeToDB(r_list)
 

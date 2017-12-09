@@ -42,10 +42,29 @@ def get_historical_surge(request):
     return JsonResponse(ret,safe=False)
 
 def get_real_time_congestion(request):
-    return JsonResponse()
+    query = "select 1 as id,lat,lng from public.data_service_tripendstats where ts >= NOW() - INTERVAL '10 minutes'"
+    cursor = TripEndStats.objects.raw(query)
+    ret = []
+    for obj in cursor:
+        ret.append([obj.lat,obj.lng])
+    return JsonResponse(ret,safe=False)
 
 def get_historical_congestion(request):
-    return JsonResponse()
+    date = request.GET.get('date','')
+    date_obj = date.split("-")
+    year = int(date_obj[0])
+    mm = int(date_obj[1])
+    dd = int(date_obj[2])
+    hh = int(date_obj[3])
+    query = '''select 1 as id, lat,lng from public.data_service_demandsupply
+    where extract(day from ts)='{}' and extract(month from ts)='{}' and
+    extract(year from ts)='{}' and extract(hour from ts)='{}'
+    '''.format(dd,mm,year,hh)
+    cursor = TripEndStats.objects.raw(query)
+    ret = []
+    for obj in cursor:
+        ret.append([obj.lat,obj.lng])
+    return JsonResponse(ret,safe=False)
 
 def get_weather_traffic_data(request):
     date = request.GET.get('date','')
