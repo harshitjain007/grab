@@ -31,6 +31,12 @@ class DemandSupply(models.Model):
     is_demand = models.BooleanField()
     ts = models.DateTimeField()
 
+class TripEndStats(models.Model):
+    lat = models.CharField(max_length=32)
+    lng = models.CharField(max_length=32)
+    is_start = models.BooleanField()
+    ts = models.DateTimeField()
+
 class HourlyDemandSupply(models.Model):
     class Meta:
         unique_together = (('hour','date','geo_hash'),)

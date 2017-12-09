@@ -65,10 +65,13 @@ def surge(demand,supply,max_surge):
 
 def computeAreawiseSurge(geo_demand,geo_supply,max_surge):
     surge_dict = {}
-    for area_hash in geo_demand:
+    area_list = list(set(geo_demand.keys()+geo_supply.keys()))
+    for area_hash in area_list:
         if area_hash not in geo_supply:
             surge_dict[area_hash] = max_surge
-        elif geo_supply[area_hash]<geo_demand[area_hash]:
+        elif area_hash not in geo_demand:
+            surge_dict[area_hash] = 0
+        else:
             surge_dict[area_hash] = surge(geo_demand[area_hash],geo_supply[area_hash],max_surge)
     return surge_dict
 
@@ -85,8 +88,9 @@ def updateSurgeTable(geo_surge,geo_demand,geo_supply):
     ctr = 0
     for area_hash in geo_surge:
         supply = geo_supply[area_hash] if area_hash in geo_supply else 0
+        demand = geo_demand[area_hash] if area_hash in geo_demand else 0
         cur.execute("INSERT INTO {} (geo_hash,demand,supply,surge) VALUES ('{}',\
-        {},{},{})".format(surge_table,area_hash, geo_demand[area_hash], supply, geo_surge[area_hash]))
+        {},{},{})".format(surge_table,area_hash, demand, supply, geo_surge[area_hash]))
         ctr += 1
         if ctr%50==0:
             rds_client.commit()
