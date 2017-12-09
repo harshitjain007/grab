@@ -81,22 +81,28 @@
       var map1Data=[],map2Data=[],map3Data=[];
       function initMap() {
         map1 = new google.maps.Map(document.getElementById('map1'), {
-          zoom: 13,
-          center: {lat: 40.785091, lng: -73.968285},
+          zoom: 11,
+          center: {lat: 40.712249, lng: -73.911050},
           mapTypeId: 'terrain'
         });
         map2 = new google.maps.Map(document.getElementById('map2'), {
-          zoom: 13,
-          center: {lat: 40.785091, lng: -73.968285},
+          zoom: 11,
+          center: {lat: 40.712249, lng: -73.911050},
           mapTypeId: 'terrain'
         });
         map3 = new google.maps.Map(document.getElementById('map3'), {
-          zoom: 13,
-          center: {lat: 40.785091, lng: -73.968285},
+          zoom: 11,
+          center: {lat: 40.712249, lng: -73.911050},
           mapTypeId: 'terrain'
         });
         fetch();
         refresh();
+      }
+
+      function surge_radius(demand,supply,max_rad){
+        var coeff = 1-max_rad;
+        x = demand/supply;
+        return max_rad + coeff * Math.exp((1-x)/2);
       }
 
       function fetch(){
@@ -124,9 +130,17 @@
               fillOpacity: 0.65,
               map: map3,
               center: {lat:data[i].lat,lng:data[i].lng},
-              radius: Math.abs(rad) * 100
+              radius: surge_radius(data[i].demand,data[i].supply,600),
+              title:Math.abs(rad)
             });
             map3Data.push(cityCircle);
+            google.maps.event.addListener(cityCircle,'mouseover',function(){
+                 this.getMap().getDiv().setAttribute('title',this.get('title'));
+            });
+
+            google.maps.event.addListener(cityCircle,'mouseout',function(){
+                 this.getMap().getDiv().removeAttribute('title');
+            });
           }
       }
 
@@ -142,20 +156,33 @@
         data = JSON.parse(resp);
         for (var i=0;i<data.length;++i){
           var rad1 = data[i].surge * 100;
-          var rad2 = data[i].demand-data[i].supply;
+          var rad2 = data[i].demand - data[i].supply;
           var fColor = rad2>0 ? '#FF0000' : '#00FF00';
 
-          var cityCircle1 = new google.maps.Circle({
-              strokeColor: '#000000',
-              strokeOpacity: 0.2,
-              strokeWeight: 1,
-              fillColor: '#f5cc50',
-              fillOpacity: 0.85,
-              map: map1,
-              center: {lat:data[i].lat,lng:data[i].lng},
-              radius: rad1
+          if (rad1>100){
+            var cityCircle1 = new google.maps.Circle({
+                strokeColor: '#000000',
+                strokeOpacity: 0.2,
+                strokeWeight: 1,
+                fillColor: '#f5cc50',
+                fillOpacity: 0.85,
+                map: map1,
+                center: {lat:data[i].lat,lng:data[i].lng},
+                radius: rad1,
+                title:data[i].surge
+              });
+
+            google.maps.event.addListener(cityCircle1,'mouseover',function(){
+                 this.getMap().getDiv().setAttribute('title',this.get('title'));
             });
-          var cityCircle2 = new google.maps.Circle({
+
+            google.maps.event.addListener(cityCircle1,'mouseout',function(){
+                 this.getMap().getDiv().removeAttribute('title');
+            });
+            map1Data.push(cityCircle1);
+          }
+
+            var cityCircle2 = new google.maps.Circle({
               strokeColor: '#000000',
               strokeOpacity: 0.2,
               strokeWeight: 1,
@@ -163,10 +190,17 @@
               fillOpacity: 0.65,
               map: map2,
               center: {lat:data[i].lat,lng:data[i].lng},
-              radius: Math.abs(rad2) * 100
+              radius: surge_radius(data[i].demand,data[i].supply,600),
+              title:Math.abs(rad2)
             });
-          map1Data.push(cityCircle1);
-          map2Data.push(cityCircle2);
+              google.maps.event.addListener(cityCircle2,'mouseover',function(){
+                this.getMap().getDiv().setAttribute('title',this.get('title'));
+            });
+
+            google.maps.event.addListener(cityCircle2,'mouseout',function(){
+                this.getMap().getDiv().removeAttribute('title');
+            });
+            map2Data.push(cityCircle2);
           }
       }
 
