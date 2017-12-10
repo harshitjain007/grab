@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+{% load static %}
+<html>
+	<head>
+		<title>Generic - Theory by TEMPLATED</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+		<style>
+      .heading{
+        text-align: center;
+        font-size: 40px;
+        margin: 5px;
+      }
+      .map-small {
+        height:500px;
+        width: 49%;
+        margin-bottom: 50px;
+        float: left;
+      }
+      .map-large {
+        height:600px;
+        width: 100%;
+      }
+			select{
+				width: 20%;
+				float:left;
+				margin-left: 20px;
+			}
+    </style>
+	</head>
+	<body class="subpage">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner">
+					<a href="index.html" class="logo">Home</a>
+					<nav id="nav">
+						<a href="surge.html">Surge</a>
+						<a href="congestion.html">Congestion</a>
+						<a href="weather.html">Weather</a>
+						<a href="architecture.html">Architecture</a>
+					</nav>
+					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+				</div>
+			</header>
+
+		<!-- Three -->
+			<section id="three">
+				<div class="inner">
+					<header class="align-center">
+						<h2>Traffic Congestion</h2>
+					</header>
+				</div>
+			</section>
+
+
+			<div class="inner">
+			<h3>Real Time Congestion</h3>
+			<div id="map1" class="map-large"></div>
+
+			<h3 style="margin-top:40px;">Historical Demand-Supply</h3>
+			<select id="year" style="margin-left:0px;">
+        <option value="">2017</option>
+      </select>
+      <select id="month">
+        <option selected="selected" value="11" >November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="day">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option><option selected="selected" value="24">24</option>
+        <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+        <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <select id="hour">
+        <option value="0">0</option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option selected="selected" value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">16</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option>
+      </select>
+      <button style="float:left;margin:5px 15px 16px;" onclick="fetch()"> Go </button>
+		  <div id="map2" class="map-large"></div>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<div class="flex">
+						<div class="copyright">
+							&copy; Untitled. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com">Unsplash</a>.
+						</div>
+						<ul class="icons">
+							<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon fa-linkedin"><span class="label">linkedIn</span></a></li>
+							<li><a href="#" class="icon fa-pinterest-p"><span class="label">Pinterest</span></a></li>
+							<li><a href="#" class="icon fa-vimeo"><span class="label">Vimeo</span></a></li>
+						</ul>
+					</div>
+				</div>
+			</footer>
+		</div>
+
+		<!-- Scripts -->
+    <script>
+      var map1,map2,heatmap1,heatmap2;
+      var map1Data=[],map2Data=[];
+      function initMap() {
+        map1 = new google.maps.Map(document.getElementById('map1'), {
+          zoom: 10,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'satellite'
+        });
+        refresh();
+        map2 = new google.maps.Map(document.getElementById('map2'), {
+          zoom: 10,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'satellite'
+        });
+        fetchHistoricalData();
+      }
+
+      function refresh(){
+        resp = $.ajax({
+          type:"GET",
+          url: "/data/congestion/realtime",
+          async: false
+        }).responseText;
+
+        arr = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          ret.push(new google.maps.LatLng(arr[i][0],arr[i][1]));
+        }
+
+        if (heatmap1!=null){
+          heatmap1.setMap(null);
+        }
+        heatmap1 = new google.maps.visualization.HeatmapLayer({
+          data: ret,
+          map: map1
+        });
+      }
+
+      function fetchHistoricalData(){
+        mnth = $("#month").val();
+        day = $('#day').val();
+        hr = $('#hour').val();
+        hit_url = "/data/congestion/historical?date=2017-"+mnth+"-"+day+"-"+hr
+        resp = $.ajax({
+          type:"GET",
+          url: hit_url,
+          async: false
+        }).responseText;
+
+        data = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          ret.push(new google.maps.LatLng(arr[i][0],arr[i][1]));
+        }
+
+        if (heatmap2!=null){
+          heatmap2.setMap(null);
+        }
+        heatmap2 = new google.maps.visualization.HeatmapLayer({
+          data: ret,
+          map: map2
+        });
+      }
+
+      setInterval(refresh, 60*1000);
+    </script>
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+		<script src="{% static 'assets/js/skel.min.js' %}"></script>
+		<script src="{% static 'assets/js/util.js' %}"></script>
+		<script src="{% static 'assets/js/main.js' %}"></script>
+		<script async defer
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN4_ZVNmxSYFexf86NgQxild6LOR1h5tE&libraries=visualization&callback=initMap">
+		</script>
+
+	</body>
+</html>
