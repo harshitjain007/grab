@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+{% load static %}
+<html>
+	<head>
+		<title>Grab Taxi Interview</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+		<style>
+      .heading{
+        text-align: center;
+        font-size: 40px;
+        margin: 5px;
+      }
+      .map-small {
+        height:500px;
+        width: 49%;
+        margin-bottom: 50px;
+        float: left;
+      }
+      .map-large {
+        height:600px;
+        width: 100%;
+      }
+			select{
+				width: 20%;
+				float:left;
+				margin-left: 20px;
+			}
+    </style>
+	</head>
+	<body class="subpage">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner">
+					<a href="index.html" class="logo">Home</a>
+					<nav id="nav">
+						<a href="surge.html">Surge</a>
+						<a href="congestion.html">Congestion</a>
+						<a href="weather.html">Weather</a>
+						<a href="architecture.html">Architecture</a>
+					</nav>
+					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+				</div>
+			</header>
+
+		<!-- Three -->
+			<section id="three">
+				<div class="inner">
+					<header class="align-center">
+						<h2>Demand, Supply and Surge</h2>
+					</header>
+				</div>
+			</section>
+
+
+		<div class="inner">
+			<h3>Architecture</h3>
+      <img src="{% static 'images/architecture.jpg' %}">
+      <p>Source code repo <a href="https://github.com/harshitjain007/grab">here</a></p>
+		</div>
+		<!-- Footer -->
+		<footer id="footer">
+			<div class="inner">
+				<div class="flex">
+					<div class="copyright">
+						&copy; Untitled. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com">Unsplash</a>.
+					</div>
+					<ul class="icons">
+						<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+						<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon fa-linkedin"><span class="label">linkedIn</span></a></li>
+						<li><a href="#" class="icon fa-pinterest-p"><span class="label">Pinterest</span></a></li>
+						<li><a href="#" class="icon fa-vimeo"><span class="label">Vimeo</span></a></li>
+					</ul>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Scripts -->
+		<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+		<script src="{% static 'assets/js/skel.min.js' %}"></script>
+		<script src="{% static 'assets/js/util.js' %}"></script>
+		<script src="{% static 'assets/js/main.js' %}"></script>
+	</body>
+</html>
