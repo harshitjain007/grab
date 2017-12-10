@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+{% load static %}
+<html>
+	<head>
+		<title>Grab Taxi Interview</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+		<style>
+      .heading{
+        text-align: center;
+        font-size: 40px;
+        margin: 5px;
+      }
+      .map-small {
+        height:500px;
+        width: 49%;
+        margin-bottom: 50px;
+        float: left;
+      }
+      .map-large {
+        height:600px;
+        width: 100%;
+      }
+			select{
+				width: 20%;
+				float:left;
+				margin-left: 20px;
+			}
+    </style>
+	</head>
+	<body class="subpage">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner">
+					<a href="index.html" class="logo">Home</a>
+					<nav id="nav">
+						<a href="surge.html">Surge</a>
+						<a href="congestion.html">Congestion</a>
+						<a href="weather.html">Weather</a>
+						<a href="architecture.html">Architecture</a>
+					</nav>
+					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+				</div>
+			</header>
+
+		<!-- Three -->
+			<section id="three">
+				<div class="inner">
+					<header class="align-center">
+						<h2>Traffic Weather Analysis</h2>
+					</header>
+				</div>
+			</section>
+
+
+			<div class="inner">
+			<!-- <h3 style="margin-top:40px;">Historical Demand-Supply</h3> -->
+			<select id="year" style="margin-left:0px;">
+        <option value="">2017</option>
+      </select>
+      <select id="month">
+        <option selected="selected" value="11" >November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="day">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option><option selected="selected" value="24">24</option>
+        <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+        <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <select id="hour">
+        <option value="0">0</option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option selected="selected" value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">16</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option>
+      </select>
+      <button style="float:left;margin:5px 15px 16px;" onclick="fetch()"> Go </button>
+      <div id="chart_div" class="map-small"></div>
+      <div id="chart_div2" class="map-small" style="margin-left:20px;"></div>
+		  <div id="chart_div3" class="map-small"></div>
+      <div id="chart_div4" class="map-small" style="margin-left:20px;"></div>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<div class="flex">
+						<div class="copyright">
+							&copy; Untitled. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com">Unsplash</a>.
+						</div>
+						<ul class="icons">
+							<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon fa-linkedin"><span class="label">linkedIn</span></a></li>
+							<li><a href="#" class="icon fa-pinterest-p"><span class="label">Pinterest</span></a></li>
+							<li><a href="#" class="icon fa-vimeo"><span class="label">Vimeo</span></a></li>
+						</ul>
+					</div>
+				</div>
+			</footer>
+		</div>
+
+		<!-- Scripts -->
+		<script>
+			var map1,map2,map3;
+			var map1Data=[],map2Data=[],map3Data=[];
+			function initMap() {
+				map1 = new google.maps.Map(document.getElementById('map1'), {
+					zoom: 11,
+					center: {lat: 40.712249, lng: -73.911050},
+					mapTypeId: 'terrain'
+				});
+				map2 = new google.maps.Map(document.getElementById('map2'), {
+					zoom: 11,
+					center: {lat: 40.712249, lng: -73.911050},
+					mapTypeId: 'terrain'
+				});
+				map3 = new google.maps.Map(document.getElementById('map3'), {
+					zoom: 11,
+					center: {lat: 40.712249, lng: -73.911050},
+					mapTypeId: 'terrain'
+				});
+				fetch();
+				refresh();
+			}
+
+			function surge_radius(demand,supply,max_rad){
+				var coeff = 1-max_rad;
+				x = demand/supply;
+				return max_rad + coeff * Math.exp((1-x)/2);
+			}
+
+			function fetch(){
+				clearMap(3);
+				mnth = $("#month").val();
+				day = $('#day').val();
+				hr = $('#hour').val();
+				hit_url = "/data/surge/historical?date=2017-"+mnth+"-"+day+"-"+hr
+				resp = $.ajax({
+					type:"GET",
+					url: hit_url,
+					async: false
+				}).responseText;
+
+				data = JSON.parse(resp);
+
+				for (var i=0;i<data.length;++i){
+					var rad = data[i].demand-data[i].supply;
+					var fColor = rad>0 ? '#FF0000' : '#00FF00';
+					var cityCircle = new google.maps.Circle({
+							strokeColor: '#000000',
+							strokeOpacity: 0.2,
+							strokeWeight: 1,
+							fillColor: fColor,
+							fillOpacity: 0.65,
+							map: map3,
+							center: {lat:data[i].lat,lng:data[i].lng},
+							radius: surge_radius(data[i].demand,data[i].supply,600),
+							title:Math.abs(rad)
+						});
+						map3Data.push(cityCircle);
+						google.maps.event.addListener(cityCircle,'mouseover',function(){
+								 this.getMap().getDiv().setAttribute('title',this.get('title'));
+						});
+
+						google.maps.event.addListener(cityCircle,'mouseout',function(){
+								 this.getMap().getDiv().removeAttribute('title');
+						});
+					}
+			}
+
+			function refresh(){
+				clearMap(1);
+				clearMap(2);
+				resp = $.ajax({
+					type:"GET",
+					url: "/data/surge/realtime",
+					async: false
+				}).responseText;
+
+				data = JSON.parse(resp);
+				for (var i=0;i<data.length;++i){
+					var rad1 = data[i].surge * 100;
+					var rad2 = data[i].demand - data[i].supply;
+					var fColor = rad2>0 ? '#FF0000' : '#00FF00';
+
+					if (rad1>100){
+						var cityCircle1 = new google.maps.Circle({
+								strokeColor: '#000000',
+								strokeOpacity: 0.2,
+								strokeWeight: 1,
+								fillColor: '#f5cc50',
+								fillOpacity: 0.85,
+								map: map1,
+								center: {lat:data[i].lat,lng:data[i].lng},
+								radius: rad1,
+								title:data[i].surge
+							});
+
+						google.maps.event.addListener(cityCircle1,'mouseover',function(){
+								 this.getMap().getDiv().setAttribute('title',this.get('title'));
+						});
+
+						google.maps.event.addListener(cityCircle1,'mouseout',function(){
+								 this.getMap().getDiv().removeAttribute('title');
+						});
+						map1Data.push(cityCircle1);
+					}
+
+						var cityCircle2 = new google.maps.Circle({
+							strokeColor: '#000000',
+							strokeOpacity: 0.2,
+							strokeWeight: 1,
+							fillColor: fColor,
+							fillOpacity: 0.65,
+							map: map2,
+							center: {lat:data[i].lat,lng:data[i].lng},
+							radius: surge_radius(data[i].demand,data[i].supply,600),
+							title:Math.abs(rad2)
+						});
+							google.maps.event.addListener(cityCircle2,'mouseover',function(){
+								this.getMap().getDiv().setAttribute('title',this.get('title'));
+						});
+
+						google.maps.event.addListener(cityCircle2,'mouseout',function(){
+								this.getMap().getDiv().removeAttribute('title');
+						});
+						map2Data.push(cityCircle2);
+					}
+			}
+
+			function clearMap(mapNum) {
+				if (mapNum==1) {
+					for(var i=0;i<map1Data.length;++i) map1Data[i].setMap(null);
+					map1Data = []
+				} else if (mapNum==2){
+					for(var i=0;i<map2Data.length;++i) map2Data[i].setMap(null);
+					map2Data = []
+				} else if (mapNum==3){
+					for(var i=0;i<map3Data.length;++i) map3Data[i].setMap(null);
+					map3Data = []
+				}
+			}
+			setInterval(refresh, 60*1000);
+		</script>
+		<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+		<script src="{% static 'assets/js/skel.min.js' %}"></script>
+		<script src="{% static 'assets/js/util.js' %}"></script>
+		<script src="{% static 'assets/js/main.js' %}"></script>
+		<script async defer
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN4_ZVNmxSYFexf86NgQxild6LOR1h5tE&libraries=visualization&callback=initMap">
+		</script>
+
+	</body>
+</html>
