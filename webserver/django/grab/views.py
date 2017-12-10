@@ -15,3 +15,6 @@ def congestion(request):
 
 def weather(request):
     return render(request, 'weather.html')
+
+def architecture(request):
+    return render(request, 'architecture.html')

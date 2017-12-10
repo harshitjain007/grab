@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^surge', views.surge),
     url(r'^congestion', views.congestion),
     url(r'^weather', views.weather),
+    url(r'^architecture', views.architecture),
     url(r'^',views.index),
 ]
