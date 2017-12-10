@@ -25,11 +25,11 @@ def writeToDB(rec_list):
     cur = rds_client.cursor()
 
     logger.info("Inserting the {} records into the table...".format(rec_list[0]["ts"]))
-    query = "INSERT INTO public.data_service_demandsupply (lat,lng,geo_hash,is_demand,ts) VALUES (%s,%s,%s,%s,%s)"
+    query = "INSERT INTO public.data_service_tripendstats (lat,lng,is_start,ts) VALUES (%s,%s,%s,%s)"
 
     ctr = 0
     for rec in rec_list:
-        cur.execute(query,(rec["lat"],rec["lng"],rec["hash"],rec["is_demand"],rec["ts"]))
+        cur.execute(query,(rec["lat"],rec["lng"],rec["is_start"],rec["ts"]))
         ctr += 1
         if ctr%50==0:
             rds_client.commit()
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     total_params = 2
     params_given = len(sys.argv)
     if params_given != total_params+1:
-        logger.error("Missing arguments. Required {} given {}".format(total_params,params_given))
+        logger.error("Missing arguments. Required {} given {}".format(total_params,params_given-1))
         sys.exit(2)
 
     skip_header = True
@@ -61,10 +61,9 @@ if __name__ == "__main__":
         for row in reader:
             skip -= 1
             if skip>0:continue
-            hash_value = geohash.encode(Decimal(row[6]), Decimal(row[5]), 6)
-            is_demand = True if randint(0,1)==0 else False
+            is_start = True if randint(0,1)==0 else False
             pay_load = {
-                "hash":hash_value, "lat":row[6],"lng":row[5],"is_demand":is_demand,
+                 "lat":row[6],"lng":row[5],"is_start":is_start,
                 "ts":"{}-{}-{} {}:{}:{}".format(2017,11,dd(d),dd(h),dd(randint(m,m+9)),randint(10,59))
                 }
             rec_list.append(pay_load)

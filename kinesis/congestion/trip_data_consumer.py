@@ -25,7 +25,7 @@ def getList(rec_list,end_time):
         ts = datetime.strptime(data["ts"],"%Y-%m-%d %H:%M:%S")
         if ts > end_time: return store_list
         store_list.append({
-            "lat":data["lat"], "lng":data["long"],"ts":ts
+            "lat":data["lat"], "lng":data["long"], "ts":ts
         })
     return store_list
 
@@ -47,19 +47,24 @@ def fetchAndStoreRecords(queue_name,start_time,end_time):
     if len(store_list)!=0: writeToDB(store_list)
 
     total_rec_cnt = len(resp["Records"])
+    logger.info("Total records fetched:{}".format(total_rec_cnt))
+
+    empty_fetch_cnt=0
     while resp["NextShardIterator"] is not None:
         shard_itr_cd = resp["NextShardIterator"]
         time.sleep(0.5)
         resp = kinesis_client.get_records(ShardIterator=shard_itr_cd,Limit=100)
 
         rec_cnt = len(resp["Records"])
-        if rec_cnt==0:return
+        if rec_cnt==0:
+            empty_fetch_cnt+=1
+            if empty_fetch_cnt==10: return
+
         else: total_rec_cnt+=rec_cnt
         logger.info("Total records fetched:{}".format(total_rec_cnt))
 
         r_list = getList(resp["Records"],end_time)
-        if len(r_list)==0: return
-        writeToDB(r_list)
+        if len(r_list)!=0: writeToDB(r_list)
 
 def writeToDB(rec_list):
     cur = rds_client.cursor()

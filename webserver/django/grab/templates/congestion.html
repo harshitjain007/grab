@@ -66,7 +66,7 @@
         <option value="19">16</option><option value="20">20</option><option value="21">21</option>
         <option value="22">22</option><option value="23">23</option>
       </select>
-      <button style="float:left;margin:15px" onclick="fetch()"> Go </button>
+      <button style="float:left;margin:15px" onclick="fetchHistoricalData()"> Go </button>
       <div id="map2" class="map-large"></div>
     </div>
     <script>
@@ -74,13 +74,13 @@
       var map1Data=[],map2Data=[];
       function initMap() {
         map1 = new google.maps.Map(document.getElementById('map1'), {
-          zoom: 11,
+          zoom: 10,
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'satellite'
         });
         refresh();
         map2 = new google.maps.Map(document.getElementById('map2'), {
-          zoom: 11,
+          zoom: 10,
           center: {lat: 40.785091, lng: -73.968285},
           mapTypeId: 'satellite'
         });
@@ -97,8 +97,7 @@
         arr = JSON.parse(resp);
         ret = []
         for(var i=0;i<arr.length;++i){
-          obj = JSON.parse(arr[i]);
-          ret.push(new google.maps.LatLng(obj.lng,obj.lat));
+          ret.push(new google.maps.LatLng(arr[i][0],arr[i][1]));
         }
 
         if (heatmap1!=null){
@@ -106,7 +105,7 @@
         }
         heatmap1 = new google.maps.visualization.HeatmapLayer({
           data: ret,
-          map: map
+          map: map1
         });
       }
 
@@ -124,15 +123,15 @@
         data = JSON.parse(resp);
         ret = []
         for(var i=0;i<arr.length;++i){
-          obj = JSON.parse(arr[i]);
-          ret.push(new google.maps.LatLng(obj.lng,obj.lat));
+          ret.push(new google.maps.LatLng(arr[i][0],arr[i][1]));
         }
+
         if (heatmap2!=null){
           heatmap2.setMap(null);
         }
         heatmap2 = new google.maps.visualization.HeatmapLayer({
           data: ret,
-          map: map
+          map: map2
         });
       }
 

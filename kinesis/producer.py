@@ -15,12 +15,16 @@ logger = None
 def writeToQueue(queue_name,records):
     resp = kinesis_client.put_records(Records=records,StreamName=queue_name)
     shards = Set([])
-    for rec in resp["Records"]: shards.add(rec["ShardId"])
+    try:
+        for rec in resp["Records"]: shards.add(rec["ShardId"])
 
-    fail_cnt = resp['FailedRecordCount']
-    success_cnt = len(records) - fail_cnt
+        fail_cnt = resp['FailedRecordCount']
+        success_cnt = len(records) - fail_cnt
 
-    logger.info('SucessWrites:{}  FailedWrites:{} Shards:{}'.format(success_cnt,fail_cnt,str(list(shards))))
+        logger.info('SucessWrites:{}  FailedWrites:{} Shards:{}'.format(success_cnt,fail_cnt,str(list(shards))))
+    except Exception as e:
+        print(resp)
+        print(e)
 
 if __name__ == "__main__":
     total_params = 4
