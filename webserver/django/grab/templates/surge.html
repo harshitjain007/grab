@@ -1,15 +1,33 @@
 <!DOCTYPE HTML>
-<!--
-	Theory by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
--->
+{% load static %}
 <html>
 	<head>
-		<title>Generic - Theory by TEMPLATED</title>
+		<title>Grab Taxi Interview</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+		<style>
+      .heading{
+        text-align: center;
+        font-size: 40px;
+        margin: 5px;
+      }
+      .map-small {
+        height:500px;
+        width: 49%;
+        margin-bottom: 50px;
+        float: left;
+      }
+      .map-large {
+        height:600px;
+        width: 100%;
+      }
+			select{
+				width: 20%;
+				float:left;
+				margin-left: 20px;
+			}
+    </style>
 	</head>
 	<body class="subpage">
 
@@ -28,59 +46,55 @@
 			</header>
 
 		<!-- Three -->
-			<section id="three" class="wrapper">
+			<section id="three">
 				<div class="inner">
 					<header class="align-center">
 						<h2>Demand, Supply and Surge</h2>
-						<p>Aliquam erat volutpat nam dui </p>
 					</header>
-
-					<select id="year">
-		        <option value="">2017</option>
-		      </select>
-		      <select id="month">
-		        <option selected="selected" value="11" >November</option>
-		        <option value="12">December</option>
-		      </select>
-		      <select id="day">
-		        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-		        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-		        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-		        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
-		        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
-		        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
-		        <option value="19">19</option><option value="20">20</option><option value="21">21</option>
-		        <option value="22">22</option><option value="23">23</option><option selected="selected" value="24">24</option>
-		        <option value="25">25</option><option value="26">26</option><option value="27">27</option>
-		        <option value="28">28</option><option value="29">29</option><option value="30">30</option>
-		        <option value="31">31</option>
-		      </select>
-		      <select id="hour">
-		        <option value="0">0</option>
-		        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-		        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-		        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-		        <option value="10">10</option><option value="11">11</option><option selected="selected" value="12">12</option>
-		        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
-		        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
-		        <option value="19">16</option><option value="20">20</option><option value="21">21</option>
-		        <option value="22">22</option><option value="23">23</option>
-		      </select>
-		      <button style="float:left;margin:15px" onclick="fetch()"> Go </button>
-		      <div id="map3" class="map-large"></div>
-
-					<div class="flex flex-2">
-						<article>
-							<div id="map1" class="image fit"></div>
-						</article>
-
-						<article>
-							<div class="map2"></div>
-						</article>
-
-					</div>
 				</div>
 			</section>
+
+
+			<div class="inner">
+			<h3>Real Time - Surge & Demand-Supply</h3>
+			<div id="map1" class="map-small"></div>
+			<div id="map2" class="map-small" style="margin-left:20px;"></div>
+
+			<h3 style="margin-top:40px;">Historical Demand-Supply</h3>
+			<select id="year" style="margin-left:0px;">
+        <option value="">2017</option>
+      </select>
+      <select id="month">
+        <option selected="selected" value="11" >November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="day">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option><option selected="selected" value="24">24</option>
+        <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+        <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <select id="hour">
+        <option value="0">0</option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option selected="selected" value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">16</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option>
+      </select>
+      <button style="float:left;margin:5px 15px 16px;" onclick="fetch()"> Go </button>
+
+		  <div id="map3" class="map-large"></div>
 
 		<!-- Footer -->
 			<footer id="footer">
@@ -99,6 +113,7 @@
 					</div>
 				</div>
 			</footer>
+		</div>
 
 		<!-- Scripts -->
 		<script>
@@ -243,13 +258,13 @@
 			}
 			setInterval(refresh, 60*1000);
 		</script>
+		<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+		<script src="{% static 'assets/js/skel.min.js' %}"></script>
+		<script src="{% static 'assets/js/util.js' %}"></script>
+		<script src="{% static 'assets/js/main.js' %}"></script>
 		<script async defer
 		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBN4_ZVNmxSYFexf86NgQxild6LOR1h5tE&libraries=visualization&callback=initMap">
 		</script>
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/skel.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
 
 	</body>
 </html>

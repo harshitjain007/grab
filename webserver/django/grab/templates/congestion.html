@@ -49,14 +49,17 @@
 			<section id="three">
 				<div class="inner">
 					<header class="align-center">
-						<h2>Traffic Weather Analysis</h2>
+						<h2>Traffic Congestion</h2>
 					</header>
 				</div>
 			</section>
 
 
 			<div class="inner">
-			<!-- <h3 style="margin-top:40px;">Historical Demand-Supply</h3> -->
+			<h3>Real Time Congestion</h3>
+			<div id="map1" class="map-large"></div>
+
+			<h3 style="margin-top:40px;">Historical Demand-Supply</h3>
 			<select id="year" style="margin-left:0px;">
         <option value="">2017</option>
       </select>
@@ -89,10 +92,7 @@
         <option value="22">22</option><option value="23">23</option>
       </select>
       <button style="float:left;margin:5px 15px 16px;" onclick="fetch()"> Go </button>
-      <div id="chart_div" class="map-small"></div>
-      <div id="chart_div2" class="map-small" style="margin-left:20px;"></div>
-		  <div id="chart_div3" class="map-small"></div>
-      <div id="chart_div4" class="map-small" style="margin-left:20px;"></div>
+		  <div id="map2" class="map-large"></div>
 
 		<!-- Footer -->
 			<footer id="footer">
@@ -114,149 +114,75 @@
 		</div>
 
 		<!-- Scripts -->
-		<script>
-			var map1,map2,map3;
-			var map1Data=[],map2Data=[],map3Data=[];
-			function initMap() {
-				map1 = new google.maps.Map(document.getElementById('map1'), {
-					zoom: 11,
-					center: {lat: 40.712249, lng: -73.911050},
-					mapTypeId: 'terrain'
-				});
-				map2 = new google.maps.Map(document.getElementById('map2'), {
-					zoom: 11,
-					center: {lat: 40.712249, lng: -73.911050},
-					mapTypeId: 'terrain'
-				});
-				map3 = new google.maps.Map(document.getElementById('map3'), {
-					zoom: 11,
-					center: {lat: 40.712249, lng: -73.911050},
-					mapTypeId: 'terrain'
-				});
-				fetch();
-				refresh();
-			}
+    <script>
+      var map1,map2,heatmap1,heatmap2;
+      var map1Data=[],map2Data=[];
+      function initMap() {
+        map1 = new google.maps.Map(document.getElementById('map1'), {
+          zoom: 10,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'satellite'
+        });
+        refresh();
+        map2 = new google.maps.Map(document.getElementById('map2'), {
+          zoom: 10,
+          center: {lat: 40.785091, lng: -73.968285},
+          mapTypeId: 'satellite'
+        });
+        fetchHistoricalData();
+      }
 
-			function surge_radius(demand,supply,max_rad){
-				var coeff = 1-max_rad;
-				x = demand/supply;
-				return max_rad + coeff * Math.exp((1-x)/2);
-			}
+      function refresh(){
+        resp = $.ajax({
+          type:"GET",
+          url: "/data/congestion/realtime",
+          async: false
+        }).responseText;
 
-			function fetch(){
-				clearMap(3);
-				mnth = $("#month").val();
-				day = $('#day').val();
-				hr = $('#hour').val();
-				hit_url = "/data/surge/historical?date=2017-"+mnth+"-"+day+"-"+hr
-				resp = $.ajax({
-					type:"GET",
-					url: hit_url,
-					async: false
-				}).responseText;
+        arr = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          ret.push(new google.maps.LatLng(arr[i][0],arr[i][1]));
+        }
 
-				data = JSON.parse(resp);
+        if (heatmap1!=null){
+          heatmap1.setMap(null);
+        }
+        heatmap1 = new google.maps.visualization.HeatmapLayer({
+          data: ret,
+          map: map1
+        });
+      }
 
-				for (var i=0;i<data.length;++i){
-					var rad = data[i].demand-data[i].supply;
-					var fColor = rad>0 ? '#FF0000' : '#00FF00';
-					var cityCircle = new google.maps.Circle({
-							strokeColor: '#000000',
-							strokeOpacity: 0.2,
-							strokeWeight: 1,
-							fillColor: fColor,
-							fillOpacity: 0.65,
-							map: map3,
-							center: {lat:data[i].lat,lng:data[i].lng},
-							radius: surge_radius(data[i].demand,data[i].supply,600),
-							title:Math.abs(rad)
-						});
-						map3Data.push(cityCircle);
-						google.maps.event.addListener(cityCircle,'mouseover',function(){
-								 this.getMap().getDiv().setAttribute('title',this.get('title'));
-						});
+      function fetchHistoricalData(){
+        mnth = $("#month").val();
+        day = $('#day').val();
+        hr = $('#hour').val();
+        hit_url = "/data/congestion/historical?date=2017-"+mnth+"-"+day+"-"+hr
+        resp = $.ajax({
+          type:"GET",
+          url: hit_url,
+          async: false
+        }).responseText;
 
-						google.maps.event.addListener(cityCircle,'mouseout',function(){
-								 this.getMap().getDiv().removeAttribute('title');
-						});
-					}
-			}
+        data = JSON.parse(resp);
+        ret = []
+        for(var i=0;i<arr.length;++i){
+          ret.push(new google.maps.LatLng(arr[i][0],arr[i][1]));
+        }
 
-			function refresh(){
-				clearMap(1);
-				clearMap(2);
-				resp = $.ajax({
-					type:"GET",
-					url: "/data/surge/realtime",
-					async: false
-				}).responseText;
+        if (heatmap2!=null){
+          heatmap2.setMap(null);
+        }
+        heatmap2 = new google.maps.visualization.HeatmapLayer({
+          data: ret,
+          map: map2
+        });
+      }
 
-				data = JSON.parse(resp);
-				for (var i=0;i<data.length;++i){
-					var rad1 = data[i].surge * 100;
-					var rad2 = data[i].demand - data[i].supply;
-					var fColor = rad2>0 ? '#FF0000' : '#00FF00';
-
-					if (rad1>100){
-						var cityCircle1 = new google.maps.Circle({
-								strokeColor: '#000000',
-								strokeOpacity: 0.2,
-								strokeWeight: 1,
-								fillColor: '#f5cc50',
-								fillOpacity: 0.85,
-								map: map1,
-								center: {lat:data[i].lat,lng:data[i].lng},
-								radius: rad1,
-								title:data[i].surge
-							});
-
-						google.maps.event.addListener(cityCircle1,'mouseover',function(){
-								 this.getMap().getDiv().setAttribute('title',this.get('title'));
-						});
-
-						google.maps.event.addListener(cityCircle1,'mouseout',function(){
-								 this.getMap().getDiv().removeAttribute('title');
-						});
-						map1Data.push(cityCircle1);
-					}
-
-						var cityCircle2 = new google.maps.Circle({
-							strokeColor: '#000000',
-							strokeOpacity: 0.2,
-							strokeWeight: 1,
-							fillColor: fColor,
-							fillOpacity: 0.65,
-							map: map2,
-							center: {lat:data[i].lat,lng:data[i].lng},
-							radius: surge_radius(data[i].demand,data[i].supply,600),
-							title:Math.abs(rad2)
-						});
-							google.maps.event.addListener(cityCircle2,'mouseover',function(){
-								this.getMap().getDiv().setAttribute('title',this.get('title'));
-						});
-
-						google.maps.event.addListener(cityCircle2,'mouseout',function(){
-								this.getMap().getDiv().removeAttribute('title');
-						});
-						map2Data.push(cityCircle2);
-					}
-			}
-
-			function clearMap(mapNum) {
-				if (mapNum==1) {
-					for(var i=0;i<map1Data.length;++i) map1Data[i].setMap(null);
-					map1Data = []
-				} else if (mapNum==2){
-					for(var i=0;i<map2Data.length;++i) map2Data[i].setMap(null);
-					map2Data = []
-				} else if (mapNum==3){
-					for(var i=0;i<map3Data.length;++i) map3Data[i].setMap(null);
-					map3Data = []
-				}
-			}
-			setInterval(refresh, 60*1000);
-		</script>
-		<script src="{% static 'assets/js/jquery.min.js' %}"></script>
+      setInterval(refresh, 60*1000);
+    </script>
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
 		<script src="{% static 'assets/js/skel.min.js' %}"></script>
 		<script src="{% static 'assets/js/util.js' %}"></script>
 		<script src="{% static 'assets/js/main.js' %}"></script>

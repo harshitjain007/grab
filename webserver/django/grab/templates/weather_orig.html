@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>visualization</title>
+    <style>
+      .heading{
+        text-align: center;
+        font-size: 40px;
+        margin: 5px;
+      }
+      .map-small {
+        height:400px;
+        width: 48%;
+        margin-bottom: 16px;
+        margin-left: 16px;
+        float: left;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: '#aa0000';
+      }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  </head>
+
+  <body bgcolor="#f6f6f6">
+    <h1 class="heading">Demand Supply Vs Weather</h1>
+    <br>
+    <div style="float:left;width:100%;margin-left:40%;margin-bottom:40px;">
+      <select id="year">
+        <option value="">2017</option>
+      </select>
+      <select id="month">
+        <option selected="selected" value="11" >November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="day">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+        <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+        <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+        <option value="22">22</option><option value="23">23</option><option selected="selected" value="24">24</option>
+        <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+        <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <button style="margin:15px" onclick="drawChart()"> Go </button>
+    </div>
+    <br>
+    <div id="chart_div" class="map-small"></div>
+    <div id="chart_div2" class="map-small"></div>
+    <div id="chart_div3" class="map-small"></div>
+    <div id="chart_div4" class="map-small"></div>
+
+    <script type="text/javascript">
+      google.charts.load('current', {packages: ['corechart']});
+      google.charts.load('current', {packages: ['line']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function prepareChart(div,data,key1,key2,axis1Label,axis2Label,titl){
+        var mnth = parseInt($("#month").val());
+        var day = parseInt($('#day').val());
+
+        var arr = [];
+        for(var i=0;i<data.length;++i) {
+            arr.push([
+              new Date(2017,mnth-1,day,parseInt(data[i]["hour"]),30,0),
+              data[i][key1],
+              data[i][key2]
+            ]);
+        }
+        var secColor = key2=='demand'?'red':'green';
+        var options = {
+          chart: {
+            title:titl
+          },
+          series: {
+            0: {axis: 0,color:'blue'},
+            1: {axis: 1,color:secColor}
+          },
+          vAxes: {
+            0: { label: axis1Label},
+            1: {label: axis2Label}
+          }
+        };
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('datetime', 'day');
+        dataTable.addColumn('number', axis1Label);
+        dataTable.addColumn('number', axis2Label);
+        dataTable.addRows(arr);
+
+        var materialChart = new google.charts.Line(div);
+        materialChart.draw(dataTable, options);
+      }
+
+      function drawChart() {
+          var chartDiv = document.getElementById('chart_div');
+          var chartDiv2 = document.getElementById('chart_div2');
+          var chartDiv3 = document.getElementById('chart_div3');
+          var chartDiv4 = document.getElementById('chart_div4');
+
+          mnth = $("#month").val();
+          day = $('#day').val();
+          hit_url = "/data/weather/?date=2017-"+mnth+"-"+day
+          resp = $.ajax({
+            type:"GET",
+            url: hit_url,
+            async: false
+          }).responseText;
+          ar = JSON.parse(resp);
+
+          prepareChart(chartDiv,ar,'temp','demand','Temp(C)','Demand','');
+          prepareChart(chartDiv2,ar,'temp','supply','Temp(C)','Supply','');
+          prepareChart(chartDiv3,ar,'hum','demand','Humidity(%)','Demand','');
+          prepareChart(chartDiv4,ar,'hum','supply','Humidity(%)','Supply','');
+    }
+    </script>
+  </body>
+</html>
