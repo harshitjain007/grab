@@ -22,6 +22,28 @@
 	article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
 		display: block;
 	}
+	
+	.heading{
+		text-align: center;
+		font-size: 40px;
+		margin: 5px;
+	}
+	.map-small {
+		height:500px;
+		width: 48%;
+		margin-left: 15px;
+		float: left;
+	}
+	.map-large {
+		height:600px;
+		width: 98%;
+		margin-left: 15px;
+		float: left;
+	}
+	select{
+		margin:15px;
+		float: left;
+	}
 
 	body {
 		line-height: 1;
